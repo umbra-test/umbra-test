@@ -1,0 +1,59 @@
+{
+  "name": "umbra-test",
+  "version": "0.0.1",
+  "description": "A fully featured library for testing TypeScript code",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "watch-build": "(tsc -w &) && (tsc -w -p tsconfig-test.json)",
+    "test": "tsc -p tsconfig-test.json && npx umbra lib/tests/**/*.js",
+    "lint": "tslint --project .",
+    "coveralls": "nyc report --reporter=text-lcov | coveralls",
+    "all": "npm run build && npm run test && npm run lint && npm run coveralls"
+  },
+  "bin": {
+    "umbra": "./lib/bin/index.js"
+  },
+  "nyc": {
+    "lines": 100,
+    "statements": 100,
+    "functions": 100,
+    "branches": 100,
+    "cache": true,
+    "check-coverage": true,
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "**/*.d.ts",
+      "tst",
+      "coverage"
+    ],
+    "reporter": [
+      "text",
+      "lcov",
+      "html"
+    ]
+  },
+  "dependencies": {
+    "@umbra-test/umbra-test-runner": "0.0.1",
+    "umbra-cli": "0.0.2"
+  },
+  "devDependencies": {
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.11.1",
+    "tslint": "^5.14.0",
+    "typescript": "^3.3.3333"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umbra-test/umbra-test.git"
+  },
+  "author": "umbra-test authors",
+  "bugs": {
+    "url": "https://github.com/umbra-test/umbra-test/issues"
+  },
+  "homepage": "https://github.com/umbra-test/umbra-test#readme"
+}

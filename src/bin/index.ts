@@ -1,0 +1,1 @@
+require("umbra-cli/bin/index");
