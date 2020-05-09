@@ -1,6 +1,6 @@
 {
   "name": "umbra-test",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A fully featured library for testing TypeScript code",
   "main": "./lib/umbra.js",
   "types": "./lib/index.d.ts",
@@ -11,6 +11,7 @@
     "test": "tsc -p tsconfig-test.json && npx umbra lib/tests/**/*.js",
     "lint": "tslint --project .",
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
+    "fixlinks": "npm link @umbra-test/umbra-util && npm link umbra-assert && npm link umbra-test-mock && npm link @umbra-test/umbra-test-runner && npm link umbra-cli --force",
     "all": "npm run build && npm run test && npm run lint && npm run coveralls"
   },
   "bin": {
@@ -49,7 +50,7 @@
     "typescript": "^3.3.3333",
     "umbra-assert": "0.0.3",
     "umbra-cli": "0.0.4",
-    "umbra-test-mock": "0.0.2",
+    "umbra-test-mock": "0.0.3",
     "@umbra-test/umbra-test-runner": "0.0.1",
     "@umbra-test/umbra-util": "0.0.3"
   },
