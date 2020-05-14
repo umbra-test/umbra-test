@@ -268,8 +268,17 @@ export declare class TestRunner {
 	private throwIfTestInProgress;
 	private resetRunResults;
 }
+declare global {
+	const it: TestRunner["it"];
+	const describe: TestRunner["describe"];
+	const after: TestRunner["after"];
+	const afterEach: TestRunner["afterEach"];
+	const before: TestRunner["before"];
+	const beforeEach: TestRunner["beforeEach"];
+	const __testRunner: TestRunner;
+}
 export declare type ExtractArrayType<T> = T extends any[] ? T[number] : T extends object ? Partial<T> : T;
-export declare class Assert {
+export declare class assert {
 	static that<T>(output: boolean): void;
 	static equal(expected: any, actual: any, message?: string): void;
 	static notEqual(expected: any, actual: any, message?: string): void;
@@ -290,15 +299,6 @@ export declare class Assert {
 	static exists<T>(expected: T | null | undefined, message?: string): expected is T;
 	static contains<T extends any[] | string | any>(target: T, value: ExtractArrayType<T>, message?: string): void;
 	static containsAll<T>(target: T[], values: T[], message?: string): void;
-}
-declare global {
-	const it: TestRunner["it"];
-	const describe: TestRunner["describe"];
-	const after: TestRunner["after"];
-	const afterEach: TestRunner["afterEach"];
-	const before: TestRunner["before"];
-	const beforeEach: TestRunner["beforeEach"];
-	const __testRunner: TestRunner;
 }
 export declare function any<T>(): T;
 export declare function gt<T extends number>(value: T): T;

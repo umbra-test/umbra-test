@@ -1,6 +1,7 @@
+import "umbra-cli/lib/StartupStages/ExportGlobals";
+
 import { ItOptions, RunResults, TestRunner, TestRunnerConfig, TimeoutConfig } from "@umbra-test/umbra-test-runner";
 import { assert } from "umbra-assert";
-import "umbra-cli/lib/StartupStages/ExportGlobals";
 import {
     any,
     ArgumentValidator,
