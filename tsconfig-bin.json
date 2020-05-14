@@ -12,14 +12,13 @@
         "preserveConstEnums": true,
         "sourceMap": true,
         "target": "es6",
-        "outDir": "./lib/",
+        "outDir": "./lib/bin",
         "declaration": true
     },
     "include": [
-        "src/**/*"
+        "src/bin/**/*"
     ],
     "exclude": [
         "node_modules",
-        "src/bin/**/*"
     ]
 }

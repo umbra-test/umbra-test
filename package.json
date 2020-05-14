@@ -1,17 +1,17 @@
 {
   "name": "umbra-test",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A fully featured library for testing TypeScript code",
   "main": "./lib/umbra.js",
   "types": "./lib/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "tsc && npx rollup -c",
-    "watch-build": "(tsc -w &) && (tsc -w -p tsconfig-test.json)",
-    "test": "tsc -p tsconfig-test.json && npx umbra lib/tests/**/*.js",
+    "build": "npx tsc && npx tsc -p tsconfig-bin.json && npx rollup -c",
+    "watch-build": "(npx tsc -w &) && (npx tsc -w -p tsconfig-test.json)",
+    "test": "npx tsc -p tsconfig-test.json && npx umbra lib/tests/**/*.js",
     "lint": "tslint --project .",
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
-    "fixlinks": "npm link @umbra-test/umbra-util && npm link umbra-assert && npm link umbra-test-mock && npm link @umbra-test/umbra-test-runner && npm link umbra-cli --force",
+    "fixlinks": "npm link @umbra-test/umbra-util && npm link umbra-assert && npm link umbra-test-mock && npm link @umbra-test/umbra-test-runner && npm link umbra-cli",
     "all": "npm run build && npm run test && npm run lint && npm run coveralls"
   },
   "bin": {
@@ -47,12 +47,12 @@
     "rollup-plugin-strip-shebang": "^1.2.9",
     "rollup-plugin-terser": "^5.3.0",
     "tslint": "^5.14.0",
-    "typescript": "^3.3.3333",
-    "umbra-assert": "0.0.3",
-    "umbra-cli": "0.0.4",
-    "umbra-test-mock": "0.0.3",
-    "@umbra-test/umbra-test-runner": "0.0.1",
-    "@umbra-test/umbra-util": "0.0.3"
+    "typescript": "^3.9.2",
+    "umbra-assert": "0.0.4",
+    "umbra-cli": "0.0.6",
+    "umbra-test-mock": "0.0.4",
+    "@umbra-test/umbra-test-runner": "0.0.3",
+    "@umbra-test/umbra-util": "0.0.4"
   },
   "repository": {
     "type": "git",
