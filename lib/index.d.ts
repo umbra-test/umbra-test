@@ -1,3 +1,12 @@
+declare global {
+	const it: TestRunner["it"];
+	const describe: TestRunner["describe"];
+	const after: TestRunner["after"];
+	const afterEach: TestRunner["afterEach"];
+	const before: TestRunner["before"];
+	const beforeEach: TestRunner["beforeEach"];
+	const __testRunner: TestRunner;
+}
 /**
  * The type-safe map of all event names to their payloads.
  *
@@ -268,19 +277,10 @@ export declare class TestRunner {
 	private throwIfTestInProgress;
 	private resetRunResults;
 }
-declare global {
-	const it: TestRunner["it"];
-	const describe: TestRunner["describe"];
-	const after: TestRunner["after"];
-	const afterEach: TestRunner["afterEach"];
-	const before: TestRunner["before"];
-	const beforeEach: TestRunner["beforeEach"];
-	const __testRunner: TestRunner;
-}
 export declare type ExtractArrayType<T> = T extends any[] ? T[number] : T extends object ? Partial<T> : T;
 export declare class assert {
 	static that<T>(output: boolean): void;
-	static equal(expected: any, actual: any, message?: string): void;
+	static equal<T>(expected: T, actual: T, message?: string): void;
 	static notEqual(expected: any, actual: any, message?: string): void;
 	static looseEqual(actual: any, expected: any, message?: string): void;
 	static notLooseEqual(actual: any, expected: any, message?: string): void;
@@ -299,6 +299,8 @@ export declare class assert {
 	static exists<T>(expected: T | null | undefined, message?: string): expected is T;
 	static contains<T extends any[] | string | any>(target: T, value: ExtractArrayType<T>, message?: string): void;
 	static containsAll<T>(target: T[], values: T[], message?: string): void;
+	static matchesSnapshotFile(snapshot: any): void;
+	static matchesSnapshotString(snapshot: any, snapshotString: string): void;
 }
 export declare function any<T>(): T;
 export declare function gt<T extends number>(value: T): T;
@@ -323,21 +325,31 @@ export interface CaptureInternalInterface<T> extends ArgumentValidator<T> {
 export declare type Capture<T> = CaptureInternalInterface<T> & T;
 export declare function newCapture<T>(): Capture<T>;
 export declare type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer P> ? P : never;
-export interface OngoingStubbing<F extends MockableFunction> {
-	withArgs(...args: Parameters<F>): OngoingStubbing<F>;
-	andReturn(...values: ReturnType<F>[]): OngoingStubbing<F>;
-	andStubReturn(...values: ReturnType<F>[]): void;
-	andThrow(...error: Error[]): OngoingStubbing<F>;
-	andResolve(...values: UnwrapPromise<ReturnType<F>>[]): OngoingStubbing<F>;
-	andReject(...values: Error[]): OngoingStubbing<F>;
-	andCallRealMethod(): OngoingStubbing<F>;
-	andAnswer(answer: Answer<F>): OngoingStubbing<F>;
-	times(wantedNumberOfInvocations: number): OngoingStubbing<F>;
-	atLeast(atLeastInvocations: number): OngoingStubbing<F>;
-	atMost(atMostInvocations: number): OngoingStubbing<F>;
-	once(): OngoingStubbing<F>;
-	twice(): OngoingStubbing<F>;
+export declare type OngoingStubbing<T> = T extends never ? never : T extends (...args: any) => infer R ? (R extends Promise<any> ? PromiseOnGoingStubbing<T, PromiseOnGoingStubbing<T, any>> : R extends void ? BaseOngoingStubbing<T, BaseOngoingStubbing<T, any>> : ReturnableOnGoingStubbing<T, ReturnableOnGoingStubbing<T, any>>) : PromiseOnGoingStubbing<any, PromiseOnGoingStubbing<any, any>>;
+export interface PromiseOnGoingStubbing<F extends MockableFunction, G extends PromiseOnGoingStubbing<F, G>> extends ReturnableOnGoingStubbing<F, G> {
+	andResolve(values: UnwrapPromise<ReturnType<F>>): G;
+	andStubResolve(values: UnwrapPromise<ReturnType<F>>): void;
+	andReject(values: Error): G;
+	andStubReject(values: Error): void;
 }
+export interface ReturnableOnGoingStubbing<F extends MockableFunction, G extends ReturnableOnGoingStubbing<F, G>> extends BaseOngoingStubbing<F, G> {
+	andReturn(values: ReturnType<F>): G;
+	andStubReturn(values: ReturnType<F>): void;
+}
+export interface BaseOngoingStubbing<F extends MockableFunction, G extends BaseOngoingStubbing<F, G>> {
+	withArgs(...args: Parameters<F>): G;
+	andThrow(error: Error): G;
+	andStubThrow(error: Error): void;
+	andCallRealMethod(): G;
+	andAnswer(answer: Answer<F>): G;
+	andStubAnswer(answer: Answer<F>): void;
+	times(wantedNumberOfInvocations: number): G;
+	atLeast(atLeastInvocations: number): G;
+	atMost(atMostInvocations: number): G;
+	once(): G;
+	twice(): G;
+}
+export declare type ClassConstructor<T> = (new (...args: any[]) => T) | (new () => T);
 export declare type Answer<F extends MockableFunction> = (...args: Parameters<F>) => ReturnType<F>;
 export declare type MockableFunction = (...args: any[]) => any;
 declare enum StrictnessMode {
@@ -348,13 +360,16 @@ export interface MockOptions {
 	strictMode: StrictnessMode;
 	inOrder: boolean;
 }
-export declare type ClassConstructor<T> = (new (...args: any[]) => T) | (new () => T);
 export declare function setDefaultOptions(options: Partial<MockOptions>): void;
 export declare function mock<T>(object?: ClassConstructor<T>, mockName?: string): T;
 export declare function mock<T extends object>(mockName: string): T;
-export declare function spy<T extends object>(realObject: T, options?: MockOptions): T;
+export declare function staticMock<T extends object>(clazz?: T): T;
+export declare function partialMock<T extends object>(realObject: T, mockName?: string | null, options?: MockOptions): T;
 export declare function expect<F extends MockableFunction>(mockedFunction: F): OngoingStubbing<F>;
-export declare function inOrder(...stubs: OngoingStubbing<any>[]): void;
+export declare function expect<C extends object, F extends MockableFunction>(mockedFunction: ClassConstructor<C>): ReturnableOnGoingStubbing<F, ReturnableOnGoingStubbing<F, any>>;
+export declare function expect<F extends any>(data: F): OngoingStubbing<any>;
+export declare function inOrder(...stubs: BaseOngoingStubbing<any, any>[]): void;
 export declare function verify(...mocks: any[]): void;
+export declare function reset(...mocks: any[]): void;
 
 export {};
