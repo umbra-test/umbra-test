@@ -325,7 +325,7 @@ export interface CaptureInternalInterface<T> extends ArgumentValidator<T> {
 export declare type Capture<T> = CaptureInternalInterface<T> & T;
 export declare function newCapture<T>(): Capture<T>;
 export declare type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer P> ? P : never;
-export declare type OngoingStubbing<T> = T extends never ? never : T extends (...args: any) => infer R ? (R extends Promise<any> ? PromiseOnGoingStubbing<T, PromiseOnGoingStubbing<T, any>> : R extends void ? BaseOngoingStubbing<T, BaseOngoingStubbing<T, any>> : ReturnableOnGoingStubbing<T, ReturnableOnGoingStubbing<T, any>>) : PromiseOnGoingStubbing<any, PromiseOnGoingStubbing<any, any>>;
+export declare type OngoingStubbing<T> = T extends never ? never : T extends (...args: any) => never ? BaseOngoingStubbing<T, BaseOngoingStubbing<T, any>> : T extends (...args: any) => infer R ? (R extends Promise<any> ? PromiseOnGoingStubbing<T, PromiseOnGoingStubbing<T, any>> : R extends void ? BaseOngoingStubbing<T, BaseOngoingStubbing<T, any>> : ReturnableOnGoingStubbing<T, ReturnableOnGoingStubbing<T, any>>) : PromiseOnGoingStubbing<any, PromiseOnGoingStubbing<any, any>>;
 export interface PromiseOnGoingStubbing<F extends MockableFunction, G extends PromiseOnGoingStubbing<F, G>> extends ReturnableOnGoingStubbing<F, G> {
 	andResolve(values: UnwrapPromise<ReturnType<F>>): G;
 	andStubResolve(values: UnwrapPromise<ReturnType<F>>): void;
