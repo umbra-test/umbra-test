@@ -1,85 +1,28 @@
-declare global {
-	const it: TestRunner["it"];
-	const describe: TestRunner["describe"];
-	const after: TestRunner["after"];
-	const afterEach: TestRunner["afterEach"];
-	const before: TestRunner["before"];
-	const beforeEach: TestRunner["beforeEach"];
-	const __testRunner: TestRunner;
-}
-/**
- * The type-safe map of all event names to their payloads.
- *
- * TODO: Move this to function signatures.
- */
-export interface EventMap {
-	/**
-	 * Fired before the file source for the test changes.
-	 *
-	 * @param path - The absolute path of the next file containing the next function to be executed.
-	 */
-	"activeFileChanged": [string];
-	/**
-	 * Fired before every test is evaluated.
-	 *
-	 * @param title - The title of the test being evaluated.
-	 */
-	"beforeTest": [string];
-	/**
-	 * Fired before a test has successfully completed. Enables tooling to change succeeding tests into failures
-	 * via returning a Promise or throwing an error.
-	 *
-	 * @param title - The title of the test having been evaluated.
-	 */
-	"beforeTestSuccess": [string];
-	/**
-	 * Fired after a test has completed successfully. This will be fired in addition to "afterTest".
-	 *
-	 * @param title - The title for the test having been evaluated.
-	 * @param elapsedMs - The amount of time it took the test to be evaluated.
-	 */
-	"testSuccess": [string, number];
-	/**
-	 * Fired after a test has failed. This will be fired in addition to "afterTest".
-	 *
-	 * @param title - The title of the test being evaluated.
-	 * @param error - The error which resulted in the test failing.
-	 * @param elapsedMs - The amount of time it took the test to be evaluated.
-	 */
-	"testFail": [string, Error, number];
-	/**
-	 * Fired after a test has timed out. This will be fired in addition to "afterTest"
-	 *
-	 * @param title - The title of the test being evaluated.
-	 * @param elapsedMs - The amount of time it took the test to be evaluated.
-	 * @param timeoutMs - The timeout value for this specific test.
-	 */
-	"testTimeout": [string, number, number];
-	/**
-	 * Fired after a test has been skipped. This will be fired in addition to "afterTest"
-	 *
-	 * @param title - The title of the test that was skipped.
-	 */
-	"testSkipped": [string];
-	/**
-	 * Fired before a describe block is evaluated.
-	 *
-	 * @param title -- The title of the describe block being evaluated.
-	 */
-	"beforeDescribe": [string];
-	/**
-	 * Fired after all tests in a describe block have been evaluated.
-	 *
-	 * @param title - The title of the describe block having been evaluated.
-	 * @param elapsedMs - The amount of time it took for the describe block to be fully evaluated, including any tests,
-	 *                     setup, and before/beforeEach/after/afterEach.
-	 */
-	"afterDescribe": [string, number];
-}
 export interface TestInfo {
 	callback: () => void | Promise<any>;
+	describeTitleChain: string[];
 	title: string;
+	absoluteFilePath: string;
+	skip: boolean;
 	timeoutMs?: number;
+}
+/**
+ * Results from an individual test. This will be fired for each and every test, including those which have failed.
+ */
+export interface TestResult {
+	result: "success" | "fail" | "timeout" | "skipped";
+	/**
+	 * Information regarding the test case, including title, timeout values, and other metadata.
+	 */
+	testInfo: TestInfo;
+	/**
+	 * The amount of time it took the test case to fully run.
+	 */
+	elapsedMs: number;
+	/**
+	 * If the result is "fail", then this is the associated error.
+	 */
+	error?: Error;
 }
 /**
  * Results from the end of the test run. These results only include the tests that have been evaluated; if `only` or
@@ -99,52 +42,43 @@ export interface RunResults {
 	 */
 	totalSuccesses: number;
 	/**
-	 * The total number of test failures.
+	 * The total number of test failures. This does NOT include test timeouts.
 	 */
 	totalFailures: number;
 	/**
-	 * The total number of test timeouts.
+	 * The total number of tests which failed due to timeout.
 	 */
 	totalTimeouts: number;
 	/**
-	 * A list of information for each and every test failure.
+	 * A list of information for each and every test success.
 	 */
-	failureInfo: {
-		/**
-		 * The chain of describes leading to the test itself.
-		 */
-		describeChain: string[];
-		/**
-		 * The title of the test. This is not guaranteed to be unique.
-		 */
-		title: string;
-		/**
-		 * The error which caused this test to fail.
-		 */
-		error: Error;
-	}[];
+	testResults: TestResult[];
+}
+/**
+ * The type-safe map of all event names to their payloads.
+ *
+ * TODO: Move this to function signatures.
+ */
+export interface EventMap {
 	/**
-	 * A list of information for each and every test failure.
+	 * Fired directly before a test has started.
+	 *
+	 * @param TestInfo
 	 */
-	timeoutInfo: {
-		/**
-		 * The chain of describes leading to the test itself.
-		 */
-		describeChain: string[];
-		/**
-		 * The title of the test. This is not guaranteed to be unique.
-		 */
-		title: string;
-		/**
-		 * The amount of time it took for the test to timeout. This may be greater than timeoutMs due to the
-		 * single-threaded nature of many long-running tests.
-		 */
-		elapsedMs: number;
-		/**
-		 * The timeout value set for thie test itself.
-		 */
-		timeoutMs: number;
-	}[];
+	"onTestStart": [TestInfo];
+	/**
+	 * Fired directly after a test has completed.
+	 */
+	"onTestEnd": [TestResult];
+	/**
+	 * Fired once all tests have been executed.
+	 */
+	"onRunEnd": [RunResults];
+	/**
+	 * Fired before a test has successfully completed. Enables tooling to change succeeding tests into failures
+	 * via returning a Promise or throwing an error.
+	 */
+	"onBeforeTestEnd": [TestResult];
 }
 /**
  * Async-method-specific timeout config. These timeout values are applied to each named method accordingly.
@@ -277,6 +211,15 @@ export declare class TestRunner {
 	private throwIfTestInProgress;
 	private resetRunResults;
 }
+declare global {
+	const it: TestRunner["it"];
+	const describe: TestRunner["describe"];
+	const after: TestRunner["after"];
+	const afterEach: TestRunner["afterEach"];
+	const before: TestRunner["before"];
+	const beforeEach: TestRunner["beforeEach"];
+	const __testRunner: TestRunner;
+}
 export declare type ExtractArrayType<T> = T extends any[] ? T[number] : T extends object ? Partial<T> : T;
 export declare class assert {
 	static that<T>(output: boolean): void;
@@ -325,7 +268,7 @@ export interface CaptureInternalInterface<T> extends ArgumentValidator<T> {
 export declare type Capture<T> = CaptureInternalInterface<T> & T;
 export declare function newCapture<T>(): Capture<T>;
 export declare type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer P> ? P : never;
-export declare type OngoingStubbing<T> = T extends never ? never : T extends (...args: any) => never ? BaseOngoingStubbing<T, BaseOngoingStubbing<T, any>> : T extends (...args: any) => infer R ? (R extends Promise<any> ? PromiseOnGoingStubbing<T, PromiseOnGoingStubbing<T, any>> : R extends void ? BaseOngoingStubbing<T, BaseOngoingStubbing<T, any>> : ReturnableOnGoingStubbing<T, ReturnableOnGoingStubbing<T, any>>) : PromiseOnGoingStubbing<any, PromiseOnGoingStubbing<any, any>>;
+export declare type OngoingStubbing<T> = T extends never ? never : any extends T ? PromiseOnGoingStubbing<any, PromiseOnGoingStubbing<any, any>> : T extends (...args: any) => never ? BaseOngoingStubbing<T, BaseOngoingStubbing<T, any>> : T extends (...args: any) => infer R ? (any extends R ? PromiseOnGoingStubbing<T, PromiseOnGoingStubbing<T, any>> : R extends Promise<any> ? PromiseOnGoingStubbing<T, PromiseOnGoingStubbing<T, any>> : R extends void ? BaseOngoingStubbing<T, BaseOngoingStubbing<T, any>> : ReturnableOnGoingStubbing<T, ReturnableOnGoingStubbing<T, any>>) : PromiseOnGoingStubbing<any, PromiseOnGoingStubbing<any, any>>;
 export interface PromiseOnGoingStubbing<F extends MockableFunction, G extends PromiseOnGoingStubbing<F, G>> extends ReturnableOnGoingStubbing<F, G> {
 	andResolve(values: UnwrapPromise<ReturnType<F>>): G;
 	andStubResolve(values: UnwrapPromise<ReturnType<F>>): void;

@@ -1,6 +1,6 @@
 {
   "name": "umbra-test",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "A fully featured library for testing TypeScript code",
   "main": "./lib/umbra.js",
   "types": "./lib/index.d.ts",
