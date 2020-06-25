@@ -95,6 +95,10 @@ export interface TimeoutConfig {
  */
 export interface TestRunnerConfig {
 	/**
+	 * Whether or not verbose logging should be enabled.
+	 */
+	verboseLogging?: boolean;
+	/**
 	 * The amount of time to wait until cancelling a long-running test. If a single value is given, this timeout is
 	 * applied to all asynchronous execution (it, before, beforeEach, after, afterEach).
 	 *
